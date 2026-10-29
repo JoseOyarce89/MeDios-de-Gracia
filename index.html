@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iglesia MeDios de Gracia</title>
+    <meta
+      name="description"
+      content="Iglesia MeDios de Gracia en Peñaflor, Chile. Reuniones miércoles y sábado 20:00 hrs. Envíanos tu petición de oración."
+    />
+
+    <!-- Vista previa al compartir el enlace (WhatsApp, Facebook) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Iglesia MeDios de Gracia" />
+    <meta
+      property="og:description"
+      content="Un lugar de fe, esperanza y comunidad en Peñaflor. Reuniones miércoles y sábado 20:00 hrs."
+    />
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1519491050282-cf00c82424b4?auto=format&fit=crop&w=1200&q=80"
+    />
+    <meta property="og:locale" content="es_CL" />
+
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232C5E8A'/%3E%3Cpath d='M14 5h4v7h7v4h-7v11h-4V16H7v-4h7z' fill='%23D4AF37'/%3E%3C/svg%3E"
+    />
+
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- HEADER & NAVBAR CENTRADO -->
+    <header class="header">
+      <div class="brand">
+        <h1>MeDios de Gracia</h1>
+        <p class="tagline">Un lugar de fe, esperanza y comunidad</p>
+      </div>
+      <nav class="navbar" id="main-nav">
+        <ul class="nav-links">
+          <li>
+            <a href="#inicio" class="active"
+              ><i class="fa-solid fa-house"></i> Inicio</a
+            >
+          </li>
+          <li>
+            <a href="#nosotros"><i class="fa-solid fa-users"></i> Nosotros</a>
+          </li>
+          <li>
+            <a href="#versiculos"
+              ><i class="fa-solid fa-quote-left"></i> Versículos</a
+            >
+          </li>
+          <li>
+            <a href="#biblia-online"
+              ><i class="fa-solid fa-book-bible"></i> Biblia Online</a
+            >
+          </li>
+          <li>
+            <a href="#oracion"
+              ><i class="fa-solid fa-hands-praying"></i> Oración</a
+            >
+          </li>
+          <li>
+            <a href="#contacto"
+              ><i class="fa-solid fa-envelope"></i> Contáctenos</a
+            >
+          </li>
+        </ul>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </nav>
+    </header>
+
+    <!-- SECCIÓN INICIO CON CARRUSEL -->
+    <section id="inicio" class="carousel-container">
+      <div class="carousel-slide fade active">
+        <img
+          src="https://plus.unsplash.com/premium_photo-1733306520273-a877dcc37e89?q=80&w=1844&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
+          alt="Interior de una iglesia acogedora"
+        />
+        <div class="carousel-caption">
+          <h2>Bienvenidos a Casa</h2>
+          <p>Un espacio para crecer en fe y compartir en familia.</p>
+        </div>
+      </div>
+      <div class="carousel-slide fade">
+        <img
+          src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=1200&q=80"
+          alt="Biblia abierta en las manos"
+        />
+        <div class="carousel-caption">
+          <h2>Transformados por su Palabra</h2>
+          <p>Encuentra paz y propósito cada día.</p>
+        </div>
+      </div>
+      <div class="carousel-slide fade">
+        <img
+          src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1200&q=80"
+          alt="Adoración con manos alzadas"
+        />
+        <div class="carousel-caption">
+          <h2>Gracia Incondicional</h2>
+          <p>Descubre el amor de Dios en nuestras reuniones.</p>
+        </div>
+      </div>
+
+      <!-- Botones de navegación del carrusel -->
+      <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
+      <button class="next" onclick="moveSlide(1)">&#10095;</button>
+
+      <!-- Puntos indicadores -->
+      <div class="dots-container">
+        <span class="dot active" onclick="currentSlide(0)"></span>
+        <span class="dot" onclick="currentSlide(1)"></span>
+        <span class="dot" onclick="currentSlide(2)"></span>
+      </div>
+    </section>
+
+    <!-- SECCIÓN SOBRE NOSOTROS -->
+<section id="nosotros" class="section-container">
+  <div class="section-title">
+    <h2>Sobre Nosotros</h2>
+    <div class="divider"></div>
+  </div>
+
+  <div class="about-rows-container">
+    
+    <!-- BLOQUE 1: Texto Izquierda | Imagen Derecha -->
+    <div class="about-row">
+      <div class="about-text-content">
+        <h3>Nuestra Historia y Misión</h3>
+        <p>
+          En <strong>MeDios de Gracia</strong>, somos una comunidad cristiana vibrante, acogedora y comprometida con compartir el amor de Jesús. Creemos en una fe activa que transforma vidas, restaura familias e impacta positivamente a nuestra sociedad.
+        </p>
+        <p>
+          Nuestra misión es guiar a cada persona a una relación personal con Dios, brindando un ambiente de enseñanza bíblica, adoración genuina y compañerismo auténtico para todas las edades.
+        </p>
+      </div>
+      <div class="about-image-content">
+        <img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=800&q=80" alt="Nuestra iglesia" class="responsive-img" />
+      </div>
+    </div>
+
+    <!-- BLOQUE 2: Imagen Izquierda | Texto Derecha -->
+    <div class="about-row reverse">
+      <div class="about-text-content">
+        <h3>Nuestro Propósito</h3>
+        <p>
+          Existimos para exaltar el nombre de Dios y reflejar el amor de Jesucristo en todo lo que hacemos. Nuestro propósito central es ser un canal de la gracia divina para la transformación espiritual, moral y social de cada individuo, familia y comunidad a la que alcanzamos.
+        </p>
+      </div>
+      <div class="about-image-content">
+        <img src="https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=800&q=80" alt="Manos alzadas en adoración" class="responsive-img" />
+      </div>
+    </div>
+
+    <!-- BLOQUE 3: Texto Izquierda | Imagen Derecha -->
+    <div class="about-row">
+      <div class="about-text-content">
+        <h3>Nuestra Misión</h3>
+        <p>Conforme a la Gran Comisión encomendada por nuestro Señor Jesucristo (Marcos 16:15), nuestra misión fundamental es:</p>
+        <ul class="about-list">
+          <li><i class="fa-solid fa-check-circle"></i> <strong>Adorar</strong> a Dios en espíritu y en verdad, rindiendo nuestras vidas a su servicio.</li>
+          <li><i class="fa-solid fa-check-circle"></i> <strong>Anunciar</strong> el Evangelio del Señor Jesucristo a toda persona.</li>
+          <li><i class="fa-solid fa-check-circle"></i> <strong>Discipular</strong> a los creyentes, fortaleciendo su fe y conocimientos bíblicos.</li>
+          <li><i class="fa-solid fa-check-circle"></i> <strong>Manifestar</strong> el amor cristiano mediante obras activas de servicio y ayuda social.</li>
+        </ul>
+      </div>
+      <div class="about-image-content">
+        <img src="https://images.unsplash.com/photo-1609234656388-0ff363383899?auto=format&fit=crop&w=800&q=80" alt="Hermanos orando juntos en la iglesia" class="responsive-img" />
+      </div>
+    </div>
+
+    <!-- BLOQUE 4: Imagen Izquierda | Texto Derecha -->
+    <div class="about-row reverse">
+      <div class="about-text-content">
+        <h3>Nuestra Visión</h3>
+        <p>Anhelamos ser una iglesia viva, madura y de impacto social y espiritual, caracterizada por:</p>
+        <ul class="about-list">
+          <li><i class="fa-solid fa-cross"></i> <strong>Fidelidad Bíblica:</strong> Guiarnos por las Sagradas Escrituras como regla suprema de fe y conducta.</li>
+          <li><i class="fa-solid fa-seedling"></i> <strong>Transformación Integral:</strong> Promover el desarrollo moral, espiritual e intelectual de las personas.</li>
+          <li><i class="fa-solid fa-hand-holding-heart"></i> <strong>Ministerio y Servicio:</strong> Proyectar la Palabra mediante capellanía, ayuda social y medios comunitarios.</li>
+          <li><i class="fa-solid fa-users"></i> <strong>Comunidad y Solidaridad:</strong> Ser un refugio de fe, apoyo mutuo y unidad en Cristo.</li>
+        </ul>
+      </div>
+      <div class="about-image-content">
+        <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80" alt="Comunidad unida y abrazada" class="responsive-img" />
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Destacados / Valores -->
+  <div class="about-highlights">
+    <div class="highlight-item">
+      <i class="fa-solid fa-heart"></i>
+      <span>Amor y Acogida</span>
+    </div>
+    <div class="highlight-item">
+      <i class="fa-solid fa-book-open"></i>
+      <span>Enseñanza Clara</span>
+    </div>
+    <div class="highlight-item">
+      <i class="fa-solid fa-people-roof"></i>
+      <span>Familia Unida</span>
+    </div>
+  </div>
+</section>
+
+    <!-- SECCIÓN VERSÍCULO DEL DÍA -->
+    <section id="versiculos" class="section-container bg-light">
+      <div class="section-title">
+        <h2>Versículo del Día</h2>
+        <div class="divider"></div>
+      </div>
+      <div class="verse-card">
+        <i class="fa-solid fa-quote-left quote-icon"></i>
+        <p id="verse-text" class="verse-text">Cargando versículo del día...</p>
+        <h4 id="verse-ref" class="verse-ref">--</h4>
+        <button
+          class="btn-secondary"
+          onclick="obtenerNuevoVersiculoAleatorio()"
+        >
+          <i class="fa-solid fa-shuffle"></i> Ver otro versículo
+        </button>
+      </div>
+    </section>
+
+    <!-- SECCIÓN DE NOTICIAS (Completamente oculta por defecto) -->
+    <section id="seccion-noticias" class="section-container" hidden>
+      <div class="section-title">
+        <h2>Noticias y Anuncios</h2>
+        <div class="divider"></div>
+      </div>
+      <div id="contenedor-noticias" class="news-grid"></div>
+    </section>
+
+    <!-- SECCIÓN BIBLIA ONLINE INTEGRADA -->
+    <section id="biblia-online" class="section-container">
+      <div class="section-title">
+        <h2>Biblia Online</h2>
+        <p class="section-subtitle">
+          Explora la Palabra de Dios directamente desde nuestra plataforma
+        </p>
+        <div class="divider"></div>
+      </div>
+      <div class="bible-reader-card">
+        <div class="bible-controls">
+          <div class="control-group">
+            <label for="bible-book">Libro:</label>
+            <!-- Los 66 libros se cargan desde script.js -->
+            <select id="bible-book" onchange="cambiarLibroBiblico()"></select>
+          </div>
+          <div class="control-group">
+            <label for="bible-chapter">Capítulo:</label>
+            <select id="bible-chapter" onchange="cargarCapituloBiblico()"></select>
+          </div>
+          <div class="control-group">
+            <label for="bible-version">Versión:</label>
+            <select id="bible-version" onchange="cargarCapituloBiblico()">
+              <option value="RV1960">Reina Valera 1960 (RVR1960)</option>
+              <option value="NVI">Nueva Versión Internacional (NVI)</option>
+              <option value="NTV">Nueva Traducción Viviente (NTV)</option>
+              <option value="LBLA">La Biblia de las Américas (LBLA)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="bible-display" id="bible-content">
+          <!-- El contenido bíblico se inserta mediante Javascript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN PETICIONES DE ORACIÓN -->
+    <section id="oracion" class="section-container bg-light">
+      <div class="section-title">
+        <h2>Peticiones de Oración</h2>
+        <p class="section-subtitle">
+          Queremos orar contigo y por tus necesidades
+        </p>
+        <div class="divider"></div>
+      </div>
+      <div class="form-wrapper">
+        <form id="prayer-form" onsubmit="handlePrayerSubmit(event)">
+          <!-- Campo trampa anti-spam (invisible para las personas) -->
+          <input type="checkbox" name="botcheck" class="hp-field" tabindex="-1" autocomplete="off" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prayer-for">¿Por quién oramos?</label>
+              <input
+                type="text"
+                id="prayer-for"
+                placeholder="Ej: mi mamá, Ana Pérez, por mí"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="prayer-reason">Motivo</label>
+              <select id="prayer-reason">
+                <option>Salud</option>
+                <option>Familia</option>
+                <option>Trabajo / Finanzas</option>
+                <option>Salvación</option>
+                <option>Vida espiritual</option>
+                <option>Acción de gracias</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prayer-firstname">Nombre</label>
+              <input
+                type="text"
+                id="prayer-firstname"
+                placeholder="Tu nombre"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="prayer-lastname">Apellido</label>
+              <input
+                type="text"
+                id="prayer-lastname"
+                placeholder="Tu apellido"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prayer-email">Correo Electrónico (opcional)</label>
+              <input
+                type="email"
+                id="prayer-email"
+                placeholder="ejemplo@correo.com"
+              />
+            </div>
+            <div class="form-group">
+              <label for="prayer-phone">Teléfono / Celular (opcional)</label>
+              <input
+                type="tel"
+                id="prayer-phone"
+                placeholder="+56 9 1234 5678"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="prayer-request">Petición de Oración</label>
+            <textarea
+              id="prayer-request"
+              rows="5"
+              placeholder="Escribe aquí tu motivo de oración..."
+              required
+            ></textarea>
+          </div>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="prayer-confidential" />
+            <label for="prayer-confidential"
+              >Deseo que esta petición sea estrictamente confidencial (solo
+              equipo pastoral)</label
+            >
+          </div>
+          <p class="form-note">
+            Si no la marcas, compartiremos el motivo de oración con nuestro grupo
+            de intercesión, <strong>sin tus datos de contacto</strong>.
+          </p>
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Petición
+          </button>
+          <p class="form-status" role="status"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- SECCIÓN CONTACTENOS -->
+    <section id="contacto" class="section-container">
+      <div class="section-title">
+        <h2>Contáctenos</h2>
+        <p class="section-subtitle">
+          ¿Tienes alguna duda o consulta general? Escríbenos
+        </p>
+        <div class="divider"></div>
+      </div>
+      <div class="form-wrapper">
+        <form id="contact-form" onsubmit="handleContactSubmit(event)">
+          <!-- Campo trampa anti-spam (invisible para las personas) -->
+          <input type="checkbox" name="botcheck" class="hp-field" tabindex="-1" autocomplete="off" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-firstname">Nombre</label>
+              <input
+                type="text"
+                id="contact-firstname"
+                placeholder="Tu nombre"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="contact-lastname">Apellido</label>
+              <input
+                type="text"
+                id="contact-lastname"
+                placeholder="Tu apellido"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-email">Correo Electrónico</label>
+              <input
+                type="email"
+                id="contact-email"
+                placeholder="ejemplo@correo.com"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="contact-phone">Teléfono / Celular</label>
+              <input
+                type="tel"
+                id="contact-phone"
+                placeholder="+56 9 1234 5678"
+                required
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="contact-reason">Motivo de Contacto</label>
+            <select id="contact-reason">
+              <option value="general">Información General</option>
+              <option value="voluntariado">Voluntariado / Servir</option>
+              <option value="eventos">Eventos y Reuniones</option>
+              <option value="consejeria">Solicitar Consejería</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="contact-message">Mensaje</label>
+            <textarea
+              id="contact-message"
+              rows="5"
+              placeholder="Escribe tu mensaje aquí..."
+              required
+            ></textarea>
+          </div>
+          <button type="submit" class="btn-primary">
+            <i class="fa-solid fa-paper-plane"></i> Enviar Mensaje
+          </button>
+          <p class="form-status" role="status"></p>
+        </form>
+      </div>
+
+      <!-- MAPA DE UBICACIÓN -->
+      <div class="map-wrapper">
+        <h3><i class="fa-solid fa-location-dot"></i> Cómo llegar</h3>
+        <iframe
+          src="https://maps.google.com/maps?q=Avda.%20Balmaceda%201873%2C%20Pe%C3%B1aflor%2C%20Chile&output=embed"
+          title="Mapa: Avda. Balmaceda 1873, Peñaflor"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </section>
+
+    <!-- FOOTER / PIE DE PÁGINA -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-col brand-col">
+          <h3>MeDios de Gracia</h3>
+          <p>
+            Una iglesia comprometida con la verdad, la gracia y el servicio a la
+            comunidad.
+          </p>
+          <div class="social-links">
+            <a
+              href="https://www.facebook.com/profile.php?id=61578703400354"
+              aria-label="Facebook"
+              ><i class="fa-brands fa-facebook-f"></i
+            ></a>
+            <a
+              href="https://www.instagram.com/medios_de_gracia_mdg/"
+              aria-label="Instagram"
+              ><i class="fa-brands fa-instagram"></i
+            ></a>
+            <a href="#" aria-label="YouTube"
+              ><i class="fa-brands fa-youtube"></i
+            ></a>
+            <a href="#" aria-label="Spotify"
+              ><i class="fa-brands fa-spotify"></i
+            ></a>
+          </div>
+        </div>
+
+        <div class="footer-col links-col">
+          <h4>Navegación</h4>
+          <ul>
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#nosotros">Nosotros</a></li>
+            <li><a href="#versiculos">Versículos</a></li>
+            <li><a href="#biblia-online">Biblia Online</a></li>
+            <li><a href="#oracion">Oración</a></li>
+            <li><a href="#contacto">Contáctenos</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col contact-col">
+          <h4>Ubicación y Horarios</h4>
+          <p>
+            <i class="fa-solid fa-location-dot"></i> Avda. Balmaceda 1873,
+            Peñaflor, Chile
+          </p>
+          <p><i class="fa-solid fa-phone"></i> +56 9 8765 4321</p>
+          <p><i class="fa-solid fa-envelope"></i> mediosdegracia1873@gmail.com</p>
+          <div class="schedules">
+            <h5>Reuniones Principales:</h5>
+            <p>Miércoles: 20:00 hrs</p>
+            <p>Sábado: 20:00 hrs</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>
+          &copy; 2026 Iglesia MeDios de Gracia. Todos los derechos reservados.
+        </p>
+      </div>
+    </footer>
+
+    <!-- BOTÓN FLOTANTE DE WHATSAPP (se activa con WHATSAPP_NUMERO en config.js) -->
+    <a
+      id="whatsapp-float"
+      class="whatsapp-float"
+      target="_blank"
+      rel="noopener"
+      aria-label="Escríbenos por WhatsApp"
+      hidden
+      ><i class="fa-brands fa-whatsapp"></i
+    ></a>
+
+    <!-- JS Personalizado -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

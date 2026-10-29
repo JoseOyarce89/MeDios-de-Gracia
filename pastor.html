@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Evita que esta página aparezca en Google -->
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel del Pastor - MeDios de Gracia</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; display: flex; justify-content: center; }
+    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+    input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font: inherit; }
+    button { background: #2c3e50; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background: #1a252f; }
+    button:disabled { opacity: 0.6; cursor: wait; }
+    .btn-danger { background: #e74c3c; margin-top: 5px; }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-small { padding: 4px 8px; font-size: 12px; width: auto; }
+    .hidden { display: none; }
+    .preview-img { max-width: 100%; height: 120px; object-fit: cover; margin-top: 10px; border-radius: 5px; display: none; }
+    .mensaje { margin-top: 10px; font-size: 14px; }
+    .mensaje.error { color: #c0392b; }
+    .mensaje.ok { color: #1e7b4a; }
+    .item { border-bottom: 1px solid #ddd; padding: 12px 0; }
+    .item img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
+    .item p { margin: 5px 0; font-size: 14px; color: #555; white-space: pre-line; }
+    .item small { color: #888; }
+    .usuario { font-size: 13px; color: #888; }
+  </style>
+</head>
+<body>
+
+  <!-- INICIO DE SESIÓN -->
+  <div id="login-screen" class="card hidden">
+    <h2>Acceso Pastoral</h2>
+    <p>Ingresa tu correo y contraseña para administrar las noticias:</p>
+    <form onsubmit="login(event)">
+      <input type="email" id="email-input" placeholder="Correo" required autocomplete="username">
+      <input type="password" id="password-input" placeholder="Contraseña" required autocomplete="current-password">
+      <button type="submit" id="btn-login">Iniciar Sesión</button>
+    </form>
+    <p id="login-mensaje" class="mensaje error"></p>
+  </div>
+
+  <!-- PANEL DE ADMINISTRACIÓN -->
+  <div id="admin-panel" class="card hidden">
+    <h2>Publicar Noticia</h2>
+    <p class="usuario">Sesión iniciada como <span id="usuario-email"></span></p>
+    <form onsubmit="publicarNoticia(event)">
+
+      <label>Imagen de la noticia (Opcional):</label>
+      <input type="file" id="imagen-file" accept="image/*" onchange="previsualizarImagen(event)">
+      <img id="img-preview" class="preview-img" alt="Vista previa">
+
+      <label style="margin-top: 15px; display: block;">Título:</label>
+      <input type="text" id="titulo" required maxlength="120" placeholder="Título de la noticia">
+
+      <label style="margin-top: 15px; display: block;">Noticia / Mensaje:</label>
+      <textarea id="contenido" rows="5" required placeholder="Escribe el contenido de la noticia..."></textarea>
+
+      <button type="submit" id="btn-publicar" style="margin-top: 20px;">Publicar Noticia</button>
+      <p id="panel-mensaje" class="mensaje"></p>
+    </form>
+
+    <hr style="margin: 25px 0;">
+    <h3>Noticias Publicadas</h3>
+    <div id="lista-publicaciones"></div>
+
+    <button onclick="logout()" class="btn-danger" style="margin-top: 20px;">Cerrar Sesión</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script>
+    const db = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    const BUCKET = 'noticias';
+    let imagenComprimida = null;
+
+    function escaparHTML(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto ?? '';
+      return div.innerHTML;
+    }
+
+    function mostrarMensaje(id, texto, tipo = '') {
+      const el = document.getElementById(id);
+      el.textContent = texto;
+      el.className = `mensaje ${tipo}`;
+    }
+
+    // La sesión la valida Supabase en el servidor; no basta con modificar el navegador
+    async function login(e) {
+      e.preventDefault();
+      const boton = document.getElementById('btn-login');
+      boton.disabled = true;
+      mostrarMensaje('login-mensaje', '');
+
+      const { error } = await db.auth.signInWithPassword({
+        email: document.getElementById('email-input').value.trim(),
+        password: document.getElementById('password-input').value
+      });
+
+      boton.disabled = false;
+      if (error) {
+        mostrarMensaje('login-mensaje', 'Correo o contraseña incorrectos.', 'error');
+        return;
+      }
+      verificarSesion();
+    }
+
+    async function logout() {
+      await db.auth.signOut();
+      location.reload();
+    }
+
+    async function verificarSesion() {
+      const { data: { session } } = await db.auth.getSession();
+      document.getElementById('login-screen').classList.toggle('hidden', !!session);
+      document.getElementById('admin-panel').classList.toggle('hidden', !session);
+
+      if (session) {
+        document.getElementById('usuario-email').textContent = session.user.email;
+        renderLista();
+      }
+    }
+
+    // Reduce la imagen a máx. 1200px de ancho en JPEG para que cargue rápido en la web
+    function comprimirImagen(file, anchoMax = 1200, calidad = 0.8) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const escala = Math.min(1, anchoMax / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * escala);
+          canvas.height = Math.round(img.height * escala);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(img.src);
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('No se pudo procesar la imagen')), 'image/jpeg', calidad);
+        };
+        img.onerror = () => reject(new Error('Archivo de imagen no válido'));
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    async function previsualizarImagen(event) {
+      const file = event.target.files[0];
+      const imgPreview = document.getElementById('img-preview');
+
+      if (!file) {
+        imagenComprimida = null;
+        imgPreview.style.display = 'none';
+        return;
+      }
+
+      try {
+        imagenComprimida = await comprimirImagen(file);
+        imgPreview.src = URL.createObjectURL(imagenComprimida);
+        imgPreview.style.display = 'block';
+      } catch (error) {
+        imagenComprimida = null;
+        mostrarMensaje('panel-mensaje', error.message, 'error');
+      }
+    }
+
+    async function publicarNoticia(e) {
+      e.preventDefault();
+      const boton = document.getElementById('btn-publicar');
+      boton.disabled = true;
+      boton.textContent = 'Publicando...';
+      mostrarMensaje('panel-mensaje', '');
+
+      try {
+        let imagen_url = null;
+        let imagen_path = null;
+
+        if (imagenComprimida) {
+          imagen_path = `${Date.now()}.jpg`;
+          const { error } = await db.storage.from(BUCKET).upload(imagen_path, imagenComprimida, { contentType: 'image/jpeg' });
+          if (error) throw error;
+          imagen_url = db.storage.from(BUCKET).getPublicUrl(imagen_path).data.publicUrl;
+        }
+
+        const { error } = await db.from('noticias').insert({
+          titulo: document.getElementById('titulo').value.trim(),
+          contenido: document.getElementById('contenido').value.trim(),
+          imagen_url,
+          imagen_path
+        });
+        if (error) throw error;
+
+        // Limpiar campos
+        e.target.reset();
+        document.getElementById('img-preview').style.display = 'none';
+        imagenComprimida = null;
+
+        mostrarMensaje('panel-mensaje', '¡Noticia publicada con éxito! Ya es visible en la página principal.', 'ok');
+        renderLista();
+      } catch (error) {
+        console.error(error);
+        mostrarMensaje('panel-mensaje', `Error al publicar: ${error.message}`, 'error');
+      } finally {
+        boton.disabled = false;
+        boton.textContent = 'Publicar Noticia';
+      }
+    }
+
+    async function eliminarNoticia(id, imagenPath) {
+      if (!confirm('¿Eliminar esta noticia? Esta acción no se puede deshacer.')) return;
+
+      const { error } = await db.from('noticias').delete().eq('id', id);
+      if (error) {
+        alert(`No se pudo eliminar: ${error.message}`);
+        return;
+      }
+      if (imagenPath) {
+        await db.storage.from(BUCKET).remove([imagenPath]);
+      }
+      renderLista();
+    }
+
+    async function renderLista() {
+      const contenedor = document.getElementById('lista-publicaciones');
+      contenedor.innerHTML = '<p>Cargando...</p>';
+
+      const { data: noticias, error } = await db
+        .from('noticias')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        contenedor.innerHTML = `<p class="mensaje error">Error al cargar: ${escaparHTML(error.message)}</p>`;
+        return;
+      }
+
+      if (noticias.length === 0) {
+        contenedor.innerHTML = "<p>No hay noticias publicadas.</p>";
+        return;
+      }
+
+      contenedor.innerHTML = noticias.map(n => `
+        <div class="item">
+          ${n.imagen_url ? `<img src="${escaparHTML(n.imagen_url)}" alt="">` : ''}
+          <strong style="display: block;">${escaparHTML(n.titulo)}</strong>
+          <p>${escaparHTML(n.contenido)}</p>
+          <small>${new Date(n.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</small><br>
+          <button class="btn-danger btn-small" data-id="${n.id}" data-path="${escaparHTML(n.imagen_path || '')}">Eliminar</button>
+        </div>
+      `).join('');
+
+      contenedor.querySelectorAll('button[data-id]').forEach(btn => {
+        btn.addEventListener('click', () => eliminarNoticia(Number(btn.dataset.id), btn.dataset.path));
+      });
+    }
+
+    verificarSesion();
+  </script>
+</body>
+</html>
