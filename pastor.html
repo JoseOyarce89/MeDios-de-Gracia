@@ -6,74 +6,110 @@
   <!-- Evita que esta página aparezca en Google -->
   <meta name="robots" content="noindex, nofollow">
   <title>Panel del Pastor - MeDios de Gracia</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; display: flex; justify-content: center; }
-    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-    input, textarea, button { width: 100%; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; font: inherit; }
-    button { background: #2c3e50; color: white; border: none; cursor: pointer; font-weight: bold; }
-    button:hover { background: #1a252f; }
-    button:disabled { opacity: 0.6; cursor: wait; }
-    .btn-danger { background: #e74c3c; margin-top: 5px; }
-    .btn-danger:hover { background: #c0392b; }
-    .btn-small { padding: 4px 8px; font-size: 12px; width: auto; }
-    .hidden { display: none; }
-    .preview-img { max-width: 100%; height: 120px; object-fit: cover; margin-top: 10px; border-radius: 5px; display: none; }
-    .mensaje { margin-top: 10px; font-size: 14px; }
-    .mensaje.error { color: #c0392b; }
-    .mensaje.ok { color: #1e7b4a; }
-    .item { border-bottom: 1px solid #ddd; padding: 12px 0; }
-    .item img { width: 100%; height: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 5px; }
-    .item p { margin: 5px 0; font-size: 14px; color: #555; white-space: pre-line; }
-    .item small { color: #888; }
-    .usuario { font-size: 13px; color: #888; }
-  </style>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232C5E8A'/%3E%3Cpath d='M14 5h4v7h7v4h-7v11h-4V16H7v-4h7z' fill='%23D4AF37'/%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="admin.css">
 </head>
-<body>
+<body class="admin">
 
-  <!-- INICIO DE SESIÓN -->
-  <div id="login-screen" class="card hidden">
-    <h2>Acceso Pastoral</h2>
-    <p>Ingresa tu correo y contraseña para administrar las noticias:</p>
-    <form onsubmit="login(event)">
-      <input type="email" id="email-input" placeholder="Correo" required autocomplete="username">
-      <input type="password" id="password-input" placeholder="Contraseña" required autocomplete="current-password">
-      <button type="submit" id="btn-login">Iniciar Sesión</button>
-    </form>
-    <p id="login-mensaje" class="mensaje error"></p>
-  </div>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div>
+        <span class="admin-brand">MeDios de Gracia</span>
+        <span class="admin-subtitle">Panel Pastoral</span>
+      </div>
+      <a href="index.html" class="admin-back"><i class="fa-solid fa-arrow-left"></i> Volver al sitio</a>
+    </div>
+  </header>
 
-  <!-- PANEL DE ADMINISTRACIÓN -->
-  <div id="admin-panel" class="card hidden">
-    <h2>Publicar Noticia</h2>
-    <p class="usuario">Sesión iniciada como <span id="usuario-email"></span></p>
-    <form onsubmit="publicarNoticia(event)">
+  <main class="admin-main">
 
-      <label>Imagen de la noticia (Opcional):</label>
-      <input type="file" id="imagen-file" accept="image/*" onchange="previsualizarImagen(event)">
-      <img id="img-preview" class="preview-img" alt="Vista previa">
+    <!-- INICIO DE SESIÓN -->
+    <div id="login-screen" class="admin-card login-card" hidden>
+      <div class="login-icon"><i class="fa-solid fa-book-bible"></i></div>
+      <h2>Acceso Pastoral</h2>
+      <p class="admin-card-intro">Ingresa tu correo y contraseña para administrar las noticias.</p>
+      <form onsubmit="login(event)">
+        <div class="form-group">
+          <label for="email-input">Correo</label>
+          <input type="email" id="email-input" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="password-input">Contraseña</label>
+          <input type="password" id="password-input" required autocomplete="current-password">
+        </div>
+        <button type="submit" id="btn-login" class="btn-primary">
+          <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
+        </button>
+      </form>
+      <p id="login-mensaje" class="form-status"></p>
+    </div>
 
-      <label style="margin-top: 15px; display: block;">Título:</label>
-      <input type="text" id="titulo" required maxlength="120" placeholder="Título de la noticia">
+    <!-- PANEL DE ADMINISTRACIÓN -->
+    <div id="admin-panel" hidden>
+      <div class="admin-toolbar">
+        <div>
+          <h1>Noticias de la Iglesia</h1>
+          <p>Sesión iniciada como <strong id="usuario-email"></strong></p>
+        </div>
+        <button onclick="logout()" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión</button>
+      </div>
 
-      <label style="margin-top: 15px; display: block;">Noticia / Mensaje:</label>
-      <textarea id="contenido" rows="5" required placeholder="Escribe el contenido de la noticia..."></textarea>
+      <div class="admin-grid">
+        <section class="admin-card">
+          <h2>Publicar Noticia</h2>
+          <p class="admin-card-intro">Se mostrará en la sección "Noticias y Anuncios" de la página principal.</p>
 
-      <button type="submit" id="btn-publicar" style="margin-top: 20px;">Publicar Noticia</button>
-      <p id="panel-mensaje" class="mensaje"></p>
-    </form>
+          <form onsubmit="publicarNoticia(event)">
+            <div class="form-group">
+              <label for="titulo">Título</label>
+              <input type="text" id="titulo" required maxlength="120" placeholder="Título de la noticia">
+            </div>
 
-    <hr style="margin: 25px 0;">
-    <h3>Noticias Publicadas</h3>
-    <div id="lista-publicaciones"></div>
+            <div class="form-group">
+              <label for="contenido">Noticia / Mensaje</label>
+              <textarea id="contenido" rows="6" required placeholder="Escribe el contenido de la noticia..."></textarea>
+            </div>
 
-    <button onclick="logout()" class="btn-danger" style="margin-top: 20px;">Cerrar Sesión</button>
-  </div>
+            <div class="form-group">
+              <label for="imagen-file">Imagen (opcional)</label>
+              <input type="file" id="imagen-file" accept="image/*" onchange="previsualizarImagen(event)">
+              <img id="img-preview" class="preview-img" alt="Vista previa" hidden>
+            </div>
+
+            <button type="submit" id="btn-publicar" class="btn-primary">
+              <i class="fa-solid fa-paper-plane"></i> Publicar Noticia
+            </button>
+            <p id="panel-mensaje" class="form-status"></p>
+          </form>
+        </section>
+
+        <section class="admin-card">
+          <h2>Noticias Publicadas</h2>
+          <p class="admin-card-intro">Las más recientes aparecen primero.</p>
+          <div id="lista-publicaciones"></div>
+        </section>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="admin-footer">
+    &copy; 2026 Iglesia MeDios de Gracia · Acceso restringido
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="config.js"></script>
   <script>
     const db = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
     const BUCKET = 'noticias';
+    const TEXTO_BOTON = '<i class="fa-solid fa-paper-plane"></i> Publicar Noticia';
     let imagenComprimida = null;
 
     function escaparHTML(texto) {
@@ -82,10 +118,19 @@
       return div.innerHTML;
     }
 
+    // Distingue una clave incorrecta de un problema de conexión o de configuración
+    function mensajeErrorLogin(error, textoCredenciales) {
+      if (CONFIG.SUPABASE_URL.includes('TU-PROYECTO')) {
+        return 'Falta configurar Supabase: pega SUPABASE_URL y SUPABASE_ANON_KEY en config.js.';
+      }
+      if (error.status === 400) return textoCredenciales;
+      return 'No se pudo conectar con el servidor. Revisa tu conexión o los datos de Supabase en config.js.';
+    }
+
     function mostrarMensaje(id, texto, tipo = '') {
       const el = document.getElementById(id);
       el.textContent = texto;
-      el.className = `mensaje ${tipo}`;
+      el.className = `form-status ${tipo}`;
     }
 
     // La sesión la valida Supabase en el servidor; no basta con modificar el navegador
@@ -102,7 +147,7 @@
 
       boton.disabled = false;
       if (error) {
-        mostrarMensaje('login-mensaje', 'Correo o contraseña incorrectos.', 'error');
+        mostrarMensaje('login-mensaje', mensajeErrorLogin(error, 'Correo o contraseña incorrectos.'), 'error');
         return;
       }
       verificarSesion();
@@ -115,8 +160,8 @@
 
     async function verificarSesion() {
       const { data: { session } } = await db.auth.getSession();
-      document.getElementById('login-screen').classList.toggle('hidden', !!session);
-      document.getElementById('admin-panel').classList.toggle('hidden', !session);
+      document.getElementById('login-screen').hidden = !!session;
+      document.getElementById('admin-panel').hidden = !session;
 
       if (session) {
         document.getElementById('usuario-email').textContent = session.user.email;
@@ -148,14 +193,14 @@
 
       if (!file) {
         imagenComprimida = null;
-        imgPreview.style.display = 'none';
+        imgPreview.hidden = true;
         return;
       }
 
       try {
         imagenComprimida = await comprimirImagen(file);
         imgPreview.src = URL.createObjectURL(imagenComprimida);
-        imgPreview.style.display = 'block';
+        imgPreview.hidden = false;
       } catch (error) {
         imagenComprimida = null;
         mostrarMensaje('panel-mensaje', error.message, 'error');
@@ -166,7 +211,7 @@
       e.preventDefault();
       const boton = document.getElementById('btn-publicar');
       boton.disabled = true;
-      boton.textContent = 'Publicando...';
+      boton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publicando...';
       mostrarMensaje('panel-mensaje', '');
 
       try {
@@ -190,7 +235,7 @@
 
         // Limpiar campos
         e.target.reset();
-        document.getElementById('img-preview').style.display = 'none';
+        document.getElementById('img-preview').hidden = true;
         imagenComprimida = null;
 
         mostrarMensaje('panel-mensaje', '¡Noticia publicada con éxito! Ya es visible en la página principal.', 'ok');
@@ -200,7 +245,7 @@
         mostrarMensaje('panel-mensaje', `Error al publicar: ${error.message}`, 'error');
       } finally {
         boton.disabled = false;
-        boton.textContent = 'Publicar Noticia';
+        boton.innerHTML = TEXTO_BOTON;
       }
     }
 
@@ -220,7 +265,7 @@
 
     async function renderLista() {
       const contenedor = document.getElementById('lista-publicaciones');
-      contenedor.innerHTML = '<p>Cargando...</p>';
+      contenedor.innerHTML = '<p class="admin-empty">Cargando...</p>';
 
       const { data: noticias, error } = await db
         .from('noticias')
@@ -228,22 +273,28 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        contenedor.innerHTML = `<p class="mensaje error">Error al cargar: ${escaparHTML(error.message)}</p>`;
+        contenedor.innerHTML = `<p class="form-status error">Error al cargar: ${escaparHTML(error.message)}</p>`;
         return;
       }
 
       if (noticias.length === 0) {
-        contenedor.innerHTML = "<p>No hay noticias publicadas.</p>";
+        contenedor.innerHTML = '<p class="admin-empty">No hay noticias publicadas.</p>';
         return;
       }
 
       contenedor.innerHTML = noticias.map(n => `
-        <div class="item">
+        <div class="admin-item">
           ${n.imagen_url ? `<img src="${escaparHTML(n.imagen_url)}" alt="">` : ''}
-          <strong style="display: block;">${escaparHTML(n.titulo)}</strong>
-          <p>${escaparHTML(n.contenido)}</p>
-          <small>${new Date(n.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</small><br>
-          <button class="btn-danger btn-small" data-id="${n.id}" data-path="${escaparHTML(n.imagen_path || '')}">Eliminar</button>
+          <div class="admin-item-body">
+            <strong>${escaparHTML(n.titulo)}</strong>
+            <p>${escaparHTML(n.contenido)}</p>
+            <div class="admin-item-meta">
+              <span><i class="fa-regular fa-calendar"></i> ${new Date(n.created_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            </div>
+          </div>
+          <button class="btn-delete" title="Eliminar" aria-label="Eliminar" data-id="${n.id}" data-path="${escaparHTML(n.imagen_path || '')}">
+            <i class="fa-solid fa-trash"></i>
+          </button>
         </div>
       `).join('');
 

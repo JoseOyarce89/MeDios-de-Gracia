@@ -13,6 +13,12 @@ const CONFIG = {
   SUPABASE_URL: "https://cahahbvnpiqejrfmjpwr.supabase.co",
   SUPABASE_ANON_KEY: "sb_publishable_8x0lRaKwOLtUTBfLz_sFMw_OxfNqZZk",
 
+  // Panel del Ministerio de Mujeres (mujeres.html). Se entra con este usuario
+  // o directamente con el correo de la cuenta creada en Supabase. La contraseña
+  // NO va aquí: se define al crear esa cuenta en Supabase (ver CONFIGURACION.md).
+  MUJERES_USUARIO: "pastora",
+  MUJERES_EMAIL: "pastoramediosdegracia@gmail.com",
+
   // Número de WhatsApp para el botón flotante, solo dígitos con código país
   // (ej: "56912345678"). Si se deja vacío, el botón no se muestra.
   WHATSAPP_NUMERO: ""

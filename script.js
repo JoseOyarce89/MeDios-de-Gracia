@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLectorBiblico();
   cargarVersiculoDelDia();
   cargarNoticiasEnInicio();
+  cargarMinisterioMujeres();
 });
 
 // Evita que texto escrito por usuarios se interprete como HTML
@@ -356,6 +357,35 @@ function formatearFecha(iso) {
   return new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// Lectura pública de una tabla de Supabase (ej: "noticias?select=*")
+async function consultarSupabase(consulta) {
+  const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${consulta}`, {
+    headers: { apikey: CONFIG.SUPABASE_ANON_KEY, Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}` }
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// Tarjeta de noticia; "index" es la posición en listaNoticiasActuales (para el modal)
+function tarjetaNoticia(item, index) {
+  // Si tiene más de 25 palabras, cortamos el texto
+  const palabras = item.contenido.trim().split(/\s+/);
+  const superaLimite = palabras.length > 25;
+  const textoMostrar = superaLimite ? palabras.slice(0, 25).join(' ') + '...' : item.contenido;
+
+  return `
+    <article class="news-card">
+      <div>
+        ${item.imagen_url ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}" class="news-card-img" loading="lazy">` : ''}
+        <h3>${escaparHTML(item.titulo)}</h3>
+        <p>${escaparHTML(textoMostrar)}</p>
+        ${superaLimite ? `<button class="news-more" onclick="abrirModalNoticia(${index})">Ver más →</button>` : ''}
+      </div>
+      <div class="news-date">${formatearFecha(item.created_at)}</div>
+    </article>
+  `;
+}
+
 async function cargarNoticiasEnInicio() {
   const seccion = document.getElementById('seccion-noticias');
   const contenedor = document.getElementById('contenedor-noticias');
@@ -363,12 +393,7 @@ async function cargarNoticiasEnInicio() {
   if (!seccion || !contenedor) return;
 
   try {
-    const res = await fetch(
-      `${CONFIG.SUPABASE_URL}/rest/v1/noticias?select=*&order=created_at.desc&limit=12`,
-      { headers: { apikey: CONFIG.SUPABASE_ANON_KEY, Authorization: `Bearer ${CONFIG.SUPABASE_ANON_KEY}` } }
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    listaNoticiasActuales = await res.json();
+    listaNoticiasActuales = await consultarSupabase('noticias?select=*&order=created_at.desc&limit=12');
   } catch (error) {
     console.error('Error al cargar las noticias:', error);
     listaNoticiasActuales = [];
@@ -382,24 +407,7 @@ async function cargarNoticiasEnInicio() {
 
   seccion.hidden = false;
 
-  contenedor.innerHTML = listaNoticiasActuales.map((item, index) => {
-    // Si tiene más de 25 palabras, cortamos el texto
-    const palabras = item.contenido.trim().split(/\s+/);
-    const superaLimite = palabras.length > 25;
-    const textoMostrar = superaLimite ? palabras.slice(0, 25).join(' ') + '...' : item.contenido;
-
-    return `
-      <article class="news-card">
-        <div>
-          ${item.imagen_url ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}" class="news-card-img" loading="lazy">` : ''}
-          <h3>${escaparHTML(item.titulo)}</h3>
-          <p>${escaparHTML(textoMostrar)}</p>
-          ${superaLimite ? `<button class="news-more" onclick="abrirModalNoticia(${index})">Ver más →</button>` : ''}
-        </div>
-        <div class="news-date">${formatearFecha(item.created_at)}</div>
-      </article>
-    `;
-  }).join('');
+  contenedor.innerHTML = listaNoticiasActuales.map(tarjetaNoticia).join('');
 }
 
 /* ==========================================================================
@@ -446,4 +454,94 @@ function abrirModalNoticia(index) {
 function cerrarModalNoticia() {
   const modal = document.getElementById('modal-noticia-completa');
   if (modal) modal.style.display = 'none';
+}
+
+/* ==========================================================================
+   8. MINISTERIO DE MUJERES: NOTICIAS Y ENCUENTROS (DESDE SUPABASE)
+   ========================================================================== */
+async function cargarMinisterioMujeres() {
+  const contNoticias = document.getElementById('mujeres-noticias');
+  const contEncuentros = document.getElementById('mujeres-encuentros');
+  const contRecursos = document.getElementById('mujeres-recursos');
+
+  if (!contNoticias || !contEncuentros || !contRecursos) return;
+
+  let publicaciones;
+  try {
+    publicaciones = await consultarSupabase('mujeres_publicaciones?select=*&order=created_at.desc');
+  } catch (error) {
+    console.error('Error al cargar el Ministerio de Mujeres:', error);
+    const aviso = '<p class="empty-state">No pudimos cargar las publicaciones. Intenta nuevamente más tarde.</p>';
+    contNoticias.innerHTML = aviso;
+    contEncuentros.innerHTML = aviso;
+    contRecursos.innerHTML = aviso;
+    return;
+  }
+
+  // El modal de "Ver más" lee las noticias desde esta lista
+  listaNoticiasActuales = publicaciones.filter(p => p.tipo === 'noticia');
+  const encuentros = publicaciones.filter(p => p.tipo === 'encuentro');
+  const recursos = publicaciones.filter(p => p.tipo === 'recurso');
+
+  contNoticias.innerHTML = listaNoticiasActuales.length
+    ? listaNoticiasActuales.map(tarjetaNoticia).join('')
+    : '<p class="empty-state">Pronto compartiremos noticias del ministerio.</p>';
+
+  contEncuentros.innerHTML = encuentros.length
+    ? encuentros.map(tarjetaEncuentro).join('')
+    : '<p class="empty-state">Aún no hay encuentros publicados.</p>';
+
+  contRecursos.innerHTML = recursos.length
+    ? recursos.map(tarjetaRecurso).join('')
+    : '<p class="empty-state">Pronto compartiremos recursos y guías.</p>';
+}
+
+// Botones para descargar o ver el PDF de un encuentro o recurso
+function accionesPdf(item) {
+  if (!item.pdf_url) return '';
+
+  // "?download=" hace que Supabase entregue el PDF como descarga con su nombre original
+  const nombrePdf = item.pdf_nombre || 'documento.pdf';
+  return `
+    <div class="encuentro-acciones">
+      <a class="btn-primary btn-download" href="${escaparHTML(item.pdf_url)}?download=${encodeURIComponent(nombrePdf)}">
+        <i class="fa-solid fa-file-arrow-down"></i> Descargar PDF
+      </a>
+      <a class="btn-secondary" href="${escaparHTML(item.pdf_url)}" target="_blank" rel="noopener">
+        <i class="fa-solid fa-eye"></i> Ver en línea
+      </a>
+      <span class="encuentro-archivo"><i class="fa-solid fa-file-pdf"></i> ${escaparHTML(nombrePdf)}</span>
+    </div>`;
+}
+
+function tarjetaRecurso(item) {
+  return `
+    <article class="news-card recurso-card">
+      <div>
+        ${item.imagen_url
+          ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}" class="news-card-img" loading="lazy">`
+          : '<div class="recurso-icono"><i class="fa-solid fa-file-pdf"></i></div>'}
+        <h3>${escaparHTML(item.titulo)}</h3>
+        <p>${escaparHTML(item.contenido)}</p>
+      </div>
+      ${accionesPdf(item)}
+    </article>
+  `;
+}
+
+function tarjetaEncuentro(item) {
+  // Fecha sin hora: se agrega T00:00 para que no se corra un día por la zona horaria
+  const fecha = item.fecha_evento ? formatearFecha(`${item.fecha_evento}T00:00:00`) : formatearFecha(item.created_at);
+
+  return `
+    <article class="encuentro-card">
+      ${item.imagen_url ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}" class="encuentro-img" loading="lazy">` : ''}
+      <div class="encuentro-body">
+        <span class="encuentro-fecha"><i class="fa-regular fa-calendar"></i> ${fecha}</span>
+        <h3>${escaparHTML(item.titulo)}</h3>
+        <p>${escaparHTML(item.contenido)}</p>
+        ${accionesPdf(item)}
+      </div>
+    </article>
+  `;
 }

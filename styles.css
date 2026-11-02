@@ -915,3 +915,182 @@ h1, h2, h3, h4, .tagline {
 .whatsapp-float[hidden] {
   display: none;
 }
+
+/* ==========================================================================
+   PÁGINAS INTERNAS: MINISTERIO DE MUJERES
+   ========================================================================== */
+.page-hero {
+  position: relative;
+  max-width: 1200px;
+  margin: 1.5rem auto 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background:
+    linear-gradient(rgba(26, 37, 48, 0.55), rgba(26, 37, 48, 0.75)),
+    url("https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&w=1600&q=80") center / cover;
+  color: #fff;
+  text-align: center;
+  padding: 5rem 1.5rem;
+}
+
+.page-hero-kicker {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.page-hero h2 {
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.page-hero p {
+  max-width: 640px;
+  margin: 0 auto;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  opacity: 0.92;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 2rem 1rem;
+}
+
+.encuentros-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.encuentro-card {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Sin imagen, el texto ocupa todo el ancho */
+.encuentro-card:not(:has(.encuentro-img)) {
+  grid-template-columns: 1fr;
+}
+
+.encuentro-img {
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  object-fit: cover;
+}
+
+.encuentro-body {
+  padding: 2rem;
+}
+
+.encuentro-fecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: rgba(44, 94, 138, 0.08);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  margin-bottom: 0.8rem;
+}
+
+.encuentro-body h3 {
+  font-size: 1.6rem;
+  color: var(--text-dark);
+  margin-bottom: 0.6rem;
+}
+
+.encuentro-body p {
+  color: var(--text-muted);
+  white-space: pre-line;
+  line-height: 1.7;
+}
+
+.encuentro-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.encuentro-acciones a {
+  width: auto;
+  text-decoration: none;
+}
+
+.encuentro-archivo {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  word-break: break-all;
+}
+
+.encuentro-archivo i {
+  color: #C0392B;
+}
+
+@media (max-width: 868px) {
+  .encuentro-card {
+    grid-template-columns: 1fr;
+  }
+
+  .encuentro-img {
+    min-height: 0;
+    height: 200px;
+  }
+
+  .page-hero {
+    margin: 1rem 1rem 0;
+    padding: 3.5rem 1.2rem;
+  }
+
+  .page-hero h2 {
+    font-size: 2rem;
+  }
+}
+
+/* RECURSOS Y GUÍAS */
+.recurso-card p {
+  white-space: pre-line;
+}
+
+.recurso-card .encuentro-acciones {
+  margin-top: 0.5rem;
+}
+
+.recurso-card .encuentro-acciones a {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  font-size: 0.9rem;
+}
+
+.recurso-icono {
+  height: 180px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-light);
+  color: #C0392B;
+  font-size: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

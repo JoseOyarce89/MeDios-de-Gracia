@@ -78,7 +78,83 @@ create policy "Pastor borra imágenes" on storage.objects
 
 ---
 
-## 3. Botón flotante de WhatsApp (opcional)
+## 3. Ministerio de Mujeres (Supabase)
+
+La página pública es `ministerio-mujeres.html` (está en el menú). Las noticias y los encuentros se publican desde `mujeres.html`, con:
+
+- **Usuario:** `pastoramediosdegracia@gmail.com`
+- **Contraseña:** `Mediosdegracia.2026`
+
+### 3.1 Crear la tabla, la carpeta de archivos y los permisos
+En **SQL Editor → New query**, pega esto y presiona **Run**.
+Si cambias el correo de la pastora, reemplaza `pastoramediosdegracia@gmail.com` en todo el bloque (y en `config.js`).
+
+```sql
+-- Noticias y encuentros del Ministerio de Mujeres
+create table public.mujeres_publicaciones (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  tipo text not null check (tipo in ('noticia', 'encuentro', 'recurso')),
+  titulo text not null,
+  contenido text not null,
+  fecha_evento date,
+  imagen_url text,
+  imagen_path text,
+  pdf_url text,
+  pdf_path text,
+  pdf_nombre text
+);
+
+alter table public.mujeres_publicaciones enable row level security;
+
+-- Cualquier visitante puede LEER
+create policy "Lectura pública" on public.mujeres_publicaciones
+  for select using (true);
+
+-- Solo la cuenta de la pastora puede publicar y borrar
+create policy "Pastora publica" on public.mujeres_publicaciones
+  for insert to authenticated
+  with check ((auth.jwt() ->> 'email') = 'pastoramediosdegracia@gmail.com');
+create policy "Pastora borra" on public.mujeres_publicaciones
+  for delete to authenticated
+  using ((auth.jwt() ->> 'email') = 'pastoramediosdegracia@gmail.com');
+
+-- Carpeta pública para imágenes y PDF (máx. 10 MB por archivo)
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('mujeres', 'mujeres', true, 10485760, array['image/jpeg', 'application/pdf']);
+
+create policy "Pastora sube archivos" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'mujeres' and (auth.jwt() ->> 'email') = 'pastoramediosdegracia@gmail.com');
+create policy "Pastora borra archivos" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'mujeres' and (auth.jwt() ->> 'email') = 'pastoramediosdegracia@gmail.com');
+```
+
+### 3.2 Crear la cuenta de la pastora
+1. **Authentication → Users → Add user → Create new user**.
+2. Correo: `pastoramediosdegracia@gmail.com` (el mismo de `MUJERES_EMAIL` en `config.js`).
+3. Contraseña: `Mediosdegracia.2026`. Marca **Auto Confirm User**.
+4. Para cambiar la contraseña más adelante: **Authentication → Users → (la cuenta) → Reset password**, o edítala ahí mismo.
+
+### 3.3 Cómo se publica
+- En `mujeres.html` se elige la pestaña **Subir Noticias** o **Subir Encuentros**.
+- Los encuentros pueden llevar fecha, imagen y un **PDF**; en la página pública aparece el botón **Descargar PDF**.
+- La pestaña **Subir Recursos y Guías** pide título, descripción, imagen (opcional) y un **PDF** (obligatorio).
+- En `ministerio-mujeres.html` aparecen en orden: Noticias, Encuentros y Recursos y Guías.
+
+### 3.4 Si ya habías creado la tabla antes de agregar "Recursos y Guías"
+Ejecuta esto una vez en **SQL Editor** para permitir el nuevo tipo:
+
+```sql
+alter table public.mujeres_publicaciones drop constraint mujeres_publicaciones_tipo_check;
+alter table public.mujeres_publicaciones
+  add constraint mujeres_publicaciones_tipo_check check (tipo in ('noticia', 'encuentro', 'recurso'));
+```
+
+---
+
+## 4. Botón flotante de WhatsApp (opcional)
 En `config.js`, escribe el número solo con dígitos, incluido el código de país:
 ```js
 WHATSAPP_NUMERO: "56912345678",
@@ -87,6 +163,6 @@ Si queda vacío, el botón no aparece.
 
 ---
 
-## 4. Publicar el sitio
+## 5. Publicar el sitio
 Sube la carpeta a **Netlify** (arrastrar y soltar en <https://app.netlify.com/drop>) o a **GitHub Pages**. Ambos son gratuitos.
-`pastor.html` queda en `tu-sitio/pastor.html`. No está enlazada desde el menú y está marcada para que Google no la muestre.
+`pastor.html` y `mujeres.html` quedan en `tu-sitio/pastor.html` y `tu-sitio/mujeres.html`. No están enlazadas desde el menú y están marcadas para que Google no las muestre.
