@@ -352,6 +352,7 @@ async function handleContactSubmit(event) {
 
 // Guardamos las noticias en memoria para acceder a ellas desde el modal
 let listaNoticiasActuales = [];
+let listaRecursosActuales = [];
 
 function formatearFecha(iso) {
   return new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -366,12 +367,16 @@ async function consultarSupabase(consulta) {
   return res.json();
 }
 
+// Si el texto tiene más de 25 palabras, lo cortamos para mostrarlo en la tarjeta
+function recortarTexto(texto) {
+  const palabras = (texto || '').trim().split(/\s+/);
+  const superaLimite = palabras.length > 25;
+  return { superaLimite, textoMostrar: superaLimite ? palabras.slice(0, 25).join(' ') + '...' : texto };
+}
+
 // Tarjeta de noticia; "index" es la posición en listaNoticiasActuales (para el modal)
 function tarjetaNoticia(item, index) {
-  // Si tiene más de 25 palabras, cortamos el texto
-  const palabras = item.contenido.trim().split(/\s+/);
-  const superaLimite = palabras.length > 25;
-  const textoMostrar = superaLimite ? palabras.slice(0, 25).join(' ') + '...' : item.contenido;
+  const { superaLimite, textoMostrar } = recortarTexto(item.contenido);
 
   return `
     <article class="news-card">
@@ -417,6 +422,18 @@ function abrirModalNoticia(index) {
   const noticia = listaNoticiasActuales[index];
   if (!noticia) return;
 
+  mostrarModal(noticia, `<hr><small>${formatearFecha(noticia.created_at)}</small>`);
+}
+
+// Recurso completo: en vez de la fecha mostramos los botones del PDF
+function abrirModalRecurso(index) {
+  const recurso = listaRecursosActuales[index];
+  if (!recurso) return;
+
+  mostrarModal(recurso, accionesPdf(recurso), 'news-modal-recurso');
+}
+
+function mostrarModal(item, pie, claseExtra = '') {
   // Crear o reutilizar la ventana emergente en el HTML
   let modal = document.getElementById('modal-noticia-completa');
 
@@ -438,13 +455,12 @@ function abrirModalNoticia(index) {
   }
 
   modal.innerHTML = `
-    <div class="news-modal-content">
+    <div class="news-modal-content ${claseExtra}">
       <button class="news-modal-close" onclick="cerrarModalNoticia()" aria-label="Cerrar">✕</button>
-      ${noticia.imagen_url ? `<img src="${escaparHTML(noticia.imagen_url)}" alt="${escaparHTML(noticia.titulo)}">` : ''}
-      <h2>${escaparHTML(noticia.titulo)}</h2>
-      <p>${escaparHTML(noticia.contenido)}</p>
-      <hr>
-      <small>${formatearFecha(noticia.created_at)}</small>
+      ${item.imagen_url ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}">` : ''}
+      <h2>${escaparHTML(item.titulo)}</h2>
+      <p>${escaparHTML(item.contenido)}</p>
+      ${pie}
     </div>
   `;
 
@@ -481,7 +497,7 @@ async function cargarMinisterioMujeres() {
   // El modal de "Ver más" lee las noticias desde esta lista
   listaNoticiasActuales = publicaciones.filter(p => p.tipo === 'noticia');
   const encuentros = publicaciones.filter(p => p.tipo === 'encuentro');
-  const recursos = publicaciones.filter(p => p.tipo === 'recurso');
+  listaRecursosActuales = publicaciones.filter(p => p.tipo === 'recurso');
 
   contNoticias.innerHTML = listaNoticiasActuales.length
     ? listaNoticiasActuales.map(tarjetaNoticia).join('')
@@ -491,8 +507,8 @@ async function cargarMinisterioMujeres() {
     ? encuentros.map(tarjetaEncuentro).join('')
     : '<p class="empty-state">Aún no hay encuentros publicados.</p>';
 
-  contRecursos.innerHTML = recursos.length
-    ? recursos.map(tarjetaRecurso).join('')
+  contRecursos.innerHTML = listaRecursosActuales.length
+    ? listaRecursosActuales.map(tarjetaRecurso).join('')
     : '<p class="empty-state">Pronto compartiremos recursos y guías.</p>';
 }
 
@@ -514,7 +530,10 @@ function accionesPdf(item) {
     </div>`;
 }
 
-function tarjetaRecurso(item) {
+// Tarjeta de recurso; "index" es la posición en listaRecursosActuales (para el modal)
+function tarjetaRecurso(item, index) {
+  const { superaLimite, textoMostrar } = recortarTexto(item.contenido);
+
   return `
     <article class="news-card recurso-card">
       <div>
@@ -522,7 +541,8 @@ function tarjetaRecurso(item) {
           ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}" class="news-card-img" loading="lazy">`
           : '<div class="recurso-icono"><i class="fa-solid fa-file-pdf"></i></div>'}
         <h3>${escaparHTML(item.titulo)}</h3>
-        <p>${escaparHTML(item.contenido)}</p>
+        <p>${escaparHTML(textoMostrar)}</p>
+        ${superaLimite ? `<button class="news-more" onclick="abrirModalRecurso(${index})">Ver más →</button>` : ''}
       </div>
       ${accionesPdf(item)}
     </article>

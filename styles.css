@@ -1069,6 +1069,19 @@ h1, h2, h3, h4, .tagline {
 }
 
 /* RECURSOS Y GUÍAS */
+/* La portada se muestra completa (sin recortar), centrada sobre un fondo suave */
+.recurso-card .news-card-img,
+.news-modal-recurso img {
+  height: 260px;
+  max-height: none;
+  object-fit: contain;
+  background-color: var(--accent-light);
+}
+
+.news-modal-recurso .encuentro-acciones {
+  margin-top: 1rem;
+}
+
 .recurso-card p {
   white-space: pre-line;
 }
