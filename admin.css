@@ -224,6 +224,26 @@ body.admin {
   margin-top: 0.8rem;
 }
 
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 6px;
+  margin-top: 0.8rem;
+}
+
+.preview-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+/* La primera foto es la portada */
+.preview-grid img:first-child {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
 /* LISTA DE PUBLICACIONES */
 .admin-item {
   display: flex;

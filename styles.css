@@ -854,6 +854,125 @@ h1, h2, h3, h4, .tagline {
   color: var(--text-muted);
 }
 
+/* Indicador de cantidad de fotos sobre la portada de la tarjeta */
+.news-card-media {
+  position: relative;
+}
+
+.news-card-fotos {
+  position: absolute;
+  right: 10px;
+  bottom: 22px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* CARRUSEL DE FOTOS DENTRO DEL "VER MÁS" */
+.carrusel {
+  position: relative;
+  margin-bottom: 15px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #111;
+}
+
+.carrusel-pista {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carrusel-pista::-webkit-scrollbar {
+  display: none;
+}
+
+.carrusel-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 340px;
+}
+
+/* La foto se ve completa, sin recortar */
+.news-modal-content .carrusel-slide img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.carrusel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-dark);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.carrusel-btn.prev { left: 10px; }
+.carrusel-btn.next { right: 10px; }
+
+.carrusel-contador {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.carrusel-puntos {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 50px;
+}
+
+.carrusel-puntos button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.carrusel-puntos button.activo {
+  background: #fff;
+}
+
+@media (max-width: 600px) {
+  .carrusel-slide { height: 260px; }
+  .carrusel-btn { width: 32px; height: 32px; }
+}
+
 .news-modal-close {
   position: absolute;
   top: 15px;

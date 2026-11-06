@@ -46,7 +46,8 @@ create table public.noticias (
   titulo text not null,
   contenido text not null,
   imagen_url text,
-  imagen_path text
+  imagen_path text,
+  imagenes jsonb not null default '[]'::jsonb  -- hasta 15 fotos por noticia
 );
 
 alter table public.noticias enable row level security;
@@ -100,6 +101,7 @@ create table public.mujeres_publicaciones (
   fecha_evento date,
   imagen_url text,
   imagen_path text,
+  imagenes jsonb not null default '[]'::jsonb,  -- hasta 15 fotos por noticia
   pdf_url text,
   pdf_path text,
   pdf_nombre text
@@ -151,6 +153,21 @@ alter table public.mujeres_publicaciones drop constraint mujeres_publicaciones_t
 alter table public.mujeres_publicaciones
   add constraint mujeres_publicaciones_tipo_check check (tipo in ('noticia', 'encuentro', 'recurso'));
 ```
+
+### 3.5 Varias fotos por noticia (máximo 15)
+En `pastor.html` y en la pestaña **Subir Noticias** de `mujeres.html` se pueden elegir hasta **15 fotos** a la vez; la primera es la portada.
+En la página pública, al tocar **Ver más** las fotos aparecen en un carrusel que se desliza con el dedo (o con las flechas).
+
+**Si las tablas ya existían**, ejecuta esto una vez en **SQL Editor** (sin esto, publicar dará error):
+
+```sql
+alter table public.noticias
+  add column if not exists imagenes jsonb not null default '[]'::jsonb;
+alter table public.mujeres_publicaciones
+  add column if not exists imagenes jsonb not null default '[]'::jsonb;
+```
+
+Las noticias antiguas (con una sola imagen) siguen mostrándose igual.
 
 ---
 

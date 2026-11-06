@@ -374,17 +374,32 @@ function recortarTexto(texto) {
   return { superaLimite, textoMostrar: superaLimite ? palabras.slice(0, 25).join(' ') + '...' : texto };
 }
 
+// Fotos de una publicación: las nuevas traen "imagenes"; las antiguas solo imagen_url
+function fotosDe(item) {
+  if (Array.isArray(item.imagenes) && item.imagenes.length) {
+    return item.imagenes.map(img => img.url).filter(Boolean);
+  }
+  return item.imagen_url ? [item.imagen_url] : [];
+}
+
 // Tarjeta de noticia; "index" es la posición en listaNoticiasActuales (para el modal)
 function tarjetaNoticia(item, index) {
   const { superaLimite, textoMostrar } = recortarTexto(item.contenido);
+  const fotos = fotosDe(item);
+  // Con varias fotos también se muestra "Ver más" para poder recorrerlas
+  const mostrarVerMas = superaLimite || fotos.length > 1;
 
   return `
     <article class="news-card">
       <div>
-        ${item.imagen_url ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}" class="news-card-img" loading="lazy">` : ''}
+        ${fotos.length ? `
+          <div class="news-card-media">
+            <img src="${escaparHTML(fotos[0])}" alt="${escaparHTML(item.titulo)}" class="news-card-img" loading="lazy">
+            ${fotos.length > 1 ? `<button type="button" class="news-card-fotos" onclick="abrirModalNoticia(${index})" aria-label="Ver las ${fotos.length} fotos"><i class="fa-regular fa-images"></i> ${fotos.length}</button>` : ''}
+          </div>` : ''}
         <h3>${escaparHTML(item.titulo)}</h3>
         <p>${escaparHTML(textoMostrar)}</p>
-        ${superaLimite ? `<button class="news-more" onclick="abrirModalNoticia(${index})">Ver más →</button>` : ''}
+        ${mostrarVerMas ? `<button class="news-more" onclick="abrirModalNoticia(${index})">Ver más →</button>` : ''}
       </div>
       <div class="news-date">${formatearFecha(item.created_at)}</div>
     </article>
@@ -450,14 +465,17 @@ function mostrarModal(item, pie, claseExtra = '') {
       if (e.target === modal) cerrarModalNoticia();
     });
     document.addEventListener('keydown', e => {
+      if (modal.style.display !== 'flex') return;
       if (e.key === 'Escape') cerrarModalNoticia();
+      if (e.key === 'ArrowLeft') moverCarrusel(-1);
+      if (e.key === 'ArrowRight') moverCarrusel(1);
     });
   }
 
   modal.innerHTML = `
     <div class="news-modal-content ${claseExtra}">
       <button class="news-modal-close" onclick="cerrarModalNoticia()" aria-label="Cerrar">✕</button>
-      ${item.imagen_url ? `<img src="${escaparHTML(item.imagen_url)}" alt="${escaparHTML(item.titulo)}">` : ''}
+      ${carruselFotos(fotosDe(item), item.titulo)}
       <h2>${escaparHTML(item.titulo)}</h2>
       <p>${escaparHTML(item.contenido)}</p>
       ${pie}
@@ -465,6 +483,63 @@ function mostrarModal(item, pie, claseExtra = '') {
   `;
 
   modal.style.display = 'flex';
+  activarCarrusel(modal);
+}
+
+/* Carrusel de fotos del modal: se desliza con el dedo (scroll-snap),
+   con las flechas o con las teclas ← → */
+function carruselFotos(fotos, titulo) {
+  if (fotos.length === 0) return '';
+  if (fotos.length === 1) {
+    return `<img src="${escaparHTML(fotos[0])}" alt="${escaparHTML(titulo)}">`;
+  }
+
+  return `
+    <div class="carrusel" aria-roledescription="carrusel">
+      <div class="carrusel-pista">
+        ${fotos.map((url, i) => `
+          <div class="carrusel-slide">
+            <img src="${escaparHTML(url)}" alt="${escaparHTML(titulo)} (foto ${i + 1} de ${fotos.length})" ${i > 0 ? 'loading="lazy"' : ''}>
+          </div>`).join('')}
+      </div>
+      <button type="button" class="carrusel-btn prev" onclick="moverCarrusel(-1)" aria-label="Foto anterior"><i class="fa-solid fa-chevron-left"></i></button>
+      <button type="button" class="carrusel-btn next" onclick="moverCarrusel(1)" aria-label="Foto siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+      <span class="carrusel-contador">1 / ${fotos.length}</span>
+      <div class="carrusel-puntos">
+        ${fotos.map((_, i) => `<button type="button" class="${i === 0 ? 'activo' : ''}" onclick="irAFoto(${i})" aria-label="Ir a la foto ${i + 1}"></button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function fotoActual(pista) {
+  return Math.round(pista.scrollLeft / pista.clientWidth);
+}
+
+function irAFoto(indice) {
+  const pista = document.querySelector('#modal-noticia-completa .carrusel-pista');
+  if (!pista) return;
+  const total = pista.children.length;
+  const destino = (indice + total) % total; // al llegar al final vuelve al inicio
+  pista.scrollTo({ left: destino * pista.clientWidth, behavior: 'smooth' });
+}
+
+function moverCarrusel(paso) {
+  const pista = document.querySelector('#modal-noticia-completa .carrusel-pista');
+  if (pista) irAFoto(fotoActual(pista) + paso);
+}
+
+// Actualiza el contador y los puntos mientras se desliza
+function activarCarrusel(modal) {
+  const pista = modal.querySelector('.carrusel-pista');
+  if (!pista) return;
+  const contador = modal.querySelector('.carrusel-contador');
+  const puntos = modal.querySelectorAll('.carrusel-puntos button');
+
+  pista.addEventListener('scroll', () => {
+    const actual = fotoActual(pista);
+    contador.textContent = `${actual + 1} / ${puntos.length}`;
+    puntos.forEach((p, i) => p.classList.toggle('activo', i === actual));
+  }, { passive: true });
 }
 
 function cerrarModalNoticia() {

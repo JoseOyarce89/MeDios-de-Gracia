@@ -95,9 +95,10 @@
             </div>
 
             <div class="form-group">
-              <label for="imagen-file">Imagen (opcional)</label>
-              <input type="file" id="imagen-file" accept="image/*" onchange="previsualizarImagen(event)">
-              <img id="img-preview" class="preview-img" alt="Vista previa" hidden>
+              <label for="imagen-file" id="imagen-label">Imagen (opcional)</label>
+              <input type="file" id="imagen-file" accept="image/*" onchange="previsualizarImagenes(event)">
+              <span class="field-hint" id="imagen-hint" hidden>La primera foto será la portada de la noticia.</span>
+              <div id="img-preview" class="preview-grid" hidden></div>
             </div>
 
             <div class="form-group con-pdf" hidden>
@@ -165,7 +166,9 @@
     };
 
     let tipoActual = 'noticia';
-    let imagenComprimida = null;
+    // Las noticias admiten varias fotos; encuentros y recursos, una sola imagen
+    const MAX_FOTOS_NOTICIA = 15;
+    let imagenesComprimidas = [];
     let publicaciones = [];
 
     function escaparHTML(texto) {
@@ -259,6 +262,16 @@
       document.getElementById('pdf-file').required = pdfObligatorio;
       document.getElementById('pdf-label').textContent = pdfObligatorio ? 'Documento PDF' : 'Documento PDF (opcional)';
 
+      // Al cambiar de pestaña se descartan las fotos elegidas (el límite cambia)
+      const esNoticia = tipo === 'noticia';
+      const inputImagen = document.getElementById('imagen-file');
+      inputImagen.multiple = esNoticia;
+      inputImagen.value = '';
+      imagenesComprimidas = [];
+      pintarPrevisualizacion();
+      document.getElementById('imagen-label').textContent = esNoticia ? `Fotos (opcional, máximo ${MAX_FOTOS_NOTICIA})` : 'Imagen (opcional)';
+      document.getElementById('imagen-hint').hidden = !esNoticia;
+
       document.getElementById('form-titulo').textContent = textos.formulario;
       document.getElementById('form-intro').textContent = textos.intro;
       document.getElementById('lista-titulo').textContent = textos.lista;
@@ -285,24 +298,38 @@
       });
     }
 
-    async function previsualizarImagen(event) {
-      const file = event.target.files[0];
-      const imgPreview = document.getElementById('img-preview');
+    function pintarPrevisualizacion() {
+      const grid = document.getElementById('img-preview');
+      grid.innerHTML = imagenesComprimidas
+        .map((blob, i) => `<img src="${URL.createObjectURL(blob)}" alt="Foto ${i + 1}">`)
+        .join('');
+      grid.hidden = imagenesComprimidas.length === 0;
+    }
 
-      if (!file) {
-        imagenComprimida = null;
-        imgPreview.hidden = true;
+    async function previsualizarImagenes(event) {
+      const archivos = [...event.target.files];
+      const maximo = tipoActual === 'noticia' ? MAX_FOTOS_NOTICIA : 1;
+      mostrarMensaje('panel-mensaje', '');
+
+      if (archivos.length > maximo) {
+        event.target.value = '';
+        imagenesComprimidas = [];
+        pintarPrevisualizacion();
+        mostrarMensaje('panel-mensaje', maximo === 1 ? 'Solo puedes subir una imagen aquí.' : `Puedes subir como máximo ${maximo} fotos por noticia (elegiste ${archivos.length}).`, 'error');
         return;
       }
 
       try {
-        imagenComprimida = await comprimirImagen(file);
-        imgPreview.src = URL.createObjectURL(imagenComprimida);
-        imgPreview.hidden = false;
+        // De una en una para no saturar la memoria del celular
+        const comprimidas = [];
+        for (const archivo of archivos) comprimidas.push(await comprimirImagen(archivo));
+        imagenesComprimidas = comprimidas;
       } catch (error) {
-        imagenComprimida = null;
+        imagenesComprimidas = [];
+        event.target.value = '';
         mostrarMensaje('panel-mensaje', error.message, 'error');
       }
+      pintarPrevisualizacion();
     }
 
     async function subirArchivo(path, archivo, contentType) {
@@ -339,10 +366,19 @@
           fecha_evento: esEncuentro ? (document.getElementById('fecha-evento').value || null) : null
         };
 
-        if (imagenComprimida) {
-          registro.imagen_path = `imagenes/${Date.now()}.jpg`;
-          registro.imagen_url = await subirArchivo(registro.imagen_path, imagenComprimida, 'image/jpeg');
-          subidos.push(registro.imagen_path);
+        // imagen_url/imagen_path guardan la portada; "imagenes" guarda todas las fotos
+        const marca = Date.now();
+        const imagenes = [];
+        for (const [i, blob] of imagenesComprimidas.entries()) {
+          const path = `imagenes/${marca}-${i + 1}.jpg`;
+          const url = await subirArchivo(path, blob, 'image/jpeg');
+          subidos.push(path);
+          imagenes.push({ path, url });
+        }
+        if (imagenes.length) {
+          registro.imagen_path = imagenes[0].path;
+          registro.imagen_url = imagenes[0].url;
+          registro.imagenes = imagenes;
         }
 
         if (pdf) {
@@ -357,8 +393,8 @@
 
         // Limpiar campos
         e.target.reset();
-        document.getElementById('img-preview').hidden = true;
-        imagenComprimida = null;
+        imagenesComprimidas = [];
+        pintarPrevisualizacion();
 
         mostrarMensaje('panel-mensaje', `${TEXTOS[tipoActual].exito} con éxito! Ya es visible en la página del ministerio.`, 'ok');
         renderLista();
@@ -383,7 +419,11 @@
         return;
       }
 
-      const archivos = [item.imagen_path, item.pdf_path].filter(Boolean);
+      const archivos = [...new Set([
+        ...(item.imagenes || []).map(img => img.path),
+        item.imagen_path,
+        item.pdf_path
+      ].filter(Boolean))];
       if (archivos.length) {
         await db.storage.from(BUCKET).remove(archivos);
       }
@@ -426,6 +466,7 @@
             <p>${escaparHTML(p.contenido)}</p>
             <div class="admin-item-meta">
               <span><i class="fa-regular fa-calendar"></i> ${formatearFecha(p.fecha_evento ? `${p.fecha_evento}T00:00:00` : p.created_at)}</span>
+              ${(p.imagenes?.length || 0) > 1 ? `<span><i class="fa-regular fa-images"></i> ${p.imagenes.length} fotos</span>` : ''}
               ${p.pdf_url ? `<a href="${escaparHTML(p.pdf_url)}" target="_blank" rel="noopener"><i class="fa-solid fa-file-pdf"></i> ${escaparHTML(p.pdf_nombre || 'PDF')}</a>` : ''}
             </div>
           </div>
